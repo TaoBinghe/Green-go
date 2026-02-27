@@ -49,6 +49,7 @@ public class UserController {
             Map<String, Object> claims = new HashMap<>();
             claims.put("username", u.getUsername());
             claims.put("id", u.getId());
+            claims.put("role", u.getRole());
             String token = JwtUtil.genToken(claims);
             return Result.success(token);
         }
