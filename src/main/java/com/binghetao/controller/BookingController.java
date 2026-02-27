@@ -4,9 +4,7 @@ import com.binghetao.domain.PricingPlan;
 import com.binghetao.domain.Result;
 import com.binghetao.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,5 +21,26 @@ public class BookingController {
         return Result.success(pricingPlans);
     }
 
+    @PostMapping
+    public Result<?> bookScooter(@RequestParam Integer scooterId, @RequestParam String hiredPeriod) {
+        boolean success = bookingService.bookScooter(scooterId, hiredPeriod);
+        if (success) {
+            return Result.success();
+        }
+        return Result.error("Scooter is not available for the requested period");
+    }
+
+    /**
+     * Activate a booking after the user confirms the selection on frontend.
+     */
+    @PostMapping("/activate")
+    public Result<?> activateBooking(@RequestParam Long bookingId) {
+        boolean success = bookingService.activateBooking(bookingId);
+        if (success) {
+            return Result.success();
+        }
+        return Result.error("Cannot activate this booking");
+    }
 
 }
+

@@ -83,3 +83,17 @@ INSERT INTO `pricing_plan` (`hire_period`, `price`) VALUES
     ('DAY_1', 30.00),
     ('WEEK_1', 100.00)
 ON DUPLICATE KEY UPDATE `price` = VALUES(`price`);
+
+-- Initial scooter data (10 scooters)
+INSERT INTO `scooter` (`scooter_code`, `status`, `location`) VALUES
+    ('SC001', 'AVAILABLE', 'Campus North Gate'),
+    ('SC002', 'AVAILABLE', 'Library Plaza'),
+    ('SC003', 'AVAILABLE', 'Sports Center'),
+    ('SC004', 'AVAILABLE', 'Student Dorm A'),
+    ('SC005', 'AVAILABLE', 'Campus South Gate'),
+    ('SC006', 'AVAILABLE', 'Cafeteria Square'),
+    ('SC007', 'AVAILABLE', 'Teaching Building B'),
+    ('SC008', 'AVAILABLE', 'Parking Lot P1'),
+    ('SC009', 'AVAILABLE', 'Main Entrance'),
+    ('SC010', 'AVAILABLE', 'Gymnasium')
+ON DUPLICATE KEY UPDATE `status` = VALUES(`status`), `location` = VALUES(`location`);

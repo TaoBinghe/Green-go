@@ -19,7 +19,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         try {
             Map<String, Object> claims = JwtUtil.parseToken(token);
 
-            // store user infomation
+            // store user information
             ThreadLocalUtil.set(claims);
             return true;
         } catch (Exception e) {
