@@ -55,7 +55,7 @@ public class UserController {
         return Result.error("Invalid username or password");
     }
 
-    @GetMapping("/orders")
+    @GetMapping("/my-orders")
     @SuppressWarnings("unchecked")
     public Result<List<Booking>> myOrders() {
         Map<String, Object> claims = ThreadLocalUtil.get();
