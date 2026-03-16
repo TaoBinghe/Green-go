@@ -46,3 +46,49 @@ export function deleteScooter(id: number) {
     params: { id }
   })
 }
+
+// ----- Admin Pricing Plans CRUD -----
+
+export interface PricingPlanDto {
+  id?: number
+  hirePeriod: string
+  price: number
+  updatedAt?: string
+}
+
+export function getPricingPlanList() {
+  return request<{ data: PricingPlanDto[] }>({
+    url: '/admin/pricing-plans',
+    method: 'get'
+  })
+}
+
+export function getPricingPlanById(id: number) {
+  return request<{ data: PricingPlanDto }>({
+    url: `/admin/pricing-plans/${id}`,
+    method: 'get'
+  })
+}
+
+export function createPricingPlan(body: { hirePeriod: string; price: number }) {
+  return request({
+    url: '/admin/pricing-plans',
+    method: 'post',
+    data: body
+  })
+}
+
+export function updatePricingPlan(id: number, body: { hirePeriod?: string; price?: number }) {
+  return request({
+    url: `/admin/pricing-plans/${id}`,
+    method: 'put',
+    data: body
+  })
+}
+
+export function deletePricingPlan(id: number) {
+  return request({
+    url: `/admin/pricing-plans/${id}`,
+    method: 'delete'
+  })
+}

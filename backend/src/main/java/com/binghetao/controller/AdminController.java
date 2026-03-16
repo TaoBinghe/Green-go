@@ -3,8 +3,8 @@ package com.binghetao.controller;
 import com.binghetao.domain.Result;
 import com.binghetao.domain.User;
 import com.binghetao.service.UserService;
+import com.binghetao.utils.AuthUtil;
 import com.binghetao.utils.JwtUtil;
-import com.binghetao.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,16 +19,9 @@ public class AdminController {
     @Autowired
     private UserService userService;
 
-    private boolean isAdmin() {
-        Map<String, Object> claims = ThreadLocalUtil.get();
-        if (claims == null) return false;
-        Object role = claims.get("role");
-        return role != null && "MANAGER".equalsIgnoreCase(role.toString());
-    }
-
     @GetMapping("/user/list")
     public Result<List<User>> listUsers() {
-        if (!isAdmin()) {
+        if (!AuthUtil.isAdmin()) {
             return Result.error("Forbidden: admin only");
         }
         List<User> users = userService.listAll();

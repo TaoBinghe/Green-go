@@ -3,12 +3,11 @@ package com.binghetao.controller;
 import com.binghetao.domain.Result;
 import com.binghetao.domain.Scooter;
 import com.binghetao.service.ScooterService;
-import com.binghetao.utils.ThreadLocalUtil;
+import com.binghetao.utils.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 // Admin scooter CRUD API
 @RestController
@@ -18,18 +17,9 @@ public class AdminScooterController {
     @Autowired
     private ScooterService scooterService;
 
-    private boolean isAdmin() {
-        Map<String, Object> claims = ThreadLocalUtil.get();
-        if (claims == null) {
-            return false;
-        }
-        Object role = claims.get("role");
-        return role != null && "MANAGER".equalsIgnoreCase(role.toString());
-    }
-
     @GetMapping("/list")
     public Result<List<Scooter>> list() {
-        if (!isAdmin()) {
+        if (!AuthUtil.isAdmin()) {
             return Result.error("Forbidden: admin only");
         }
         List<Scooter> scooters = scooterService.listAll();
@@ -38,7 +28,7 @@ public class AdminScooterController {
 
     @PostMapping("/add")
     public Result<?> add(@RequestBody Scooter scooter) {
-        if (!isAdmin()) {
+        if (!AuthUtil.isAdmin()) {
             return Result.error("Forbidden: admin only");
         }
         boolean ok = scooterService.addScooter(scooter);
@@ -51,7 +41,7 @@ public class AdminScooterController {
     // Update scooter by id
     @PostMapping("/update")
     public Result<?> update(@RequestBody Scooter scooter) {
-        if (!isAdmin()) {
+        if (!AuthUtil.isAdmin()) {
             return Result.error("Forbidden: admin only");
         }
         boolean ok = scooterService.updateScooter(scooter);
@@ -64,7 +54,7 @@ public class AdminScooterController {
     // Delete scooter by id
     @DeleteMapping("/delete")
     public Result<?> delete(@RequestParam Long id) {
-        if (!isAdmin()) {
+        if (!AuthUtil.isAdmin()) {
             return Result.error("Forbidden: admin only");
         }
         boolean ok = scooterService.deleteScooter(id);
