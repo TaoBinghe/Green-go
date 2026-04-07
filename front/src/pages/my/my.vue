@@ -98,9 +98,19 @@ export default {
   background-color: #f5f7f5;
 }
 
+.container {
+  width: 100%;
+  max-width: 960rpx;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-bottom: calc(32rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+}
+
 .my-header {
   background: linear-gradient(135deg, #07c160, #10b981);
-  padding: 80rpx 40rpx 60rpx;
+  padding: calc(56rpx + constant(safe-area-inset-top)) 40rpx 60rpx;
+  padding: calc(56rpx + env(safe-area-inset-top)) 40rpx 60rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -129,6 +139,8 @@ export default {
   font-weight: 600;
   color: #ffffff;
   margin-bottom: 8rpx;
+  text-align: center;
+  word-break: break-all;
 }
 
 .login-tip {
@@ -146,6 +158,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 32rpx 30rpx;
+  gap: 24rpx;
 }
 
 .menu-icon {
@@ -155,6 +168,7 @@ export default {
 
 .menu-text {
   flex: 1;
+  min-width: 0;
   font-size: 30rpx;
   color: #333333;
 }
@@ -162,6 +176,7 @@ export default {
 .menu-arrow {
   font-size: 28rpx;
   color: #cccccc;
+  flex-shrink: 0;
 }
 
 .menu-divider {
@@ -186,10 +201,12 @@ export default {
   font-size: 24rpx;
   color: #cccccc;
   margin-bottom: 8rpx;
+  text-align: center;
 }
 
 .app-copyright {
   font-size: 22rpx;
   color: #dddddd;
+  text-align: center;
 }
 </style>

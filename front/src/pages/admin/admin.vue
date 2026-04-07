@@ -234,6 +234,15 @@ export default {
   background-color: #f5f7f5;
 }
 
+.container {
+  width: 100%;
+  max-width: 960rpx;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-bottom: calc(32rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+}
+
 .admin-header {
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   padding: 40rpx;
@@ -243,12 +252,17 @@ export default {
 .header-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20rpx;
 }
 
 .admin-header .page-title {
   color: #ffffff;
   font-size: 38rpx;
+  flex: 1 1 360rpx;
+  min-width: 0;
+  margin-bottom: 0;
 }
 
 .header-logout {
@@ -257,6 +271,7 @@ export default {
   padding: 10rpx 24rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.3);
   border-radius: 30rpx;
+  flex-shrink: 0;
 }
 
 .scooter-count {
@@ -287,9 +302,11 @@ export default {
 .scooter-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
   padding: 24rpx 30rpx;
   border-bottom: 1rpx solid #f0f0f0;
+  gap: 20rpx;
 }
 
 .scooter-code-badge {
@@ -311,17 +328,24 @@ export default {
 .scooter-info-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   padding: 8rpx 0;
+  gap: 20rpx;
 }
 
 .scooter-info-label {
   font-size: 26rpx;
   color: #999999;
+  flex-shrink: 0;
 }
 
 .scooter-info-value {
   font-size: 26rpx;
   color: #333333;
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  word-break: break-all;
 }
 
 .scooter-card-actions {
@@ -358,13 +382,21 @@ export default {
   align-items: center;
   justify-content: center;
   z-index: 999;
+  padding: calc(32rpx + constant(safe-area-inset-top)) 32rpx calc(32rpx + constant(safe-area-inset-bottom));
+  padding: calc(32rpx + env(safe-area-inset-top)) 32rpx calc(32rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
 .modal-content {
-  width: 85%;
+  width: 100%;
+  max-width: 680rpx;
+  max-height: calc(100vh - 64rpx - constant(safe-area-inset-top) - constant(safe-area-inset-bottom));
+  max-height: calc(100vh - 64rpx - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   background-color: #ffffff;
   border-radius: 24rpx;
   padding: 48rpx 36rpx;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .modal-title {
@@ -382,14 +414,17 @@ export default {
 
 .modal-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 20rpx;
   margin-top: 36rpx;
 }
 
 .modal-btn {
-  flex: 1;
+  flex: 1 1 240rpx;
+  min-width: 0;
   height: 80rpx;
   line-height: 80rpx;
   font-size: 30rpx;
+  margin: 0;
 }
 </style>

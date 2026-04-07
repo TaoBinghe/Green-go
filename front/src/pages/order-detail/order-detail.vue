@@ -174,6 +174,12 @@ export default {
 .detail-page {
   min-height: 100vh;
   padding-top: 0;
+  padding-bottom: calc(60rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(60rpx + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 960rpx;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .status-header {
@@ -220,9 +226,10 @@ export default {
 .info-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 18rpx 0;
   border-bottom: 1rpx solid #f5f5f5;
+  gap: 20rpx;
 }
 
 .info-row:last-child {
@@ -232,12 +239,17 @@ export default {
 .info-label {
   font-size: 28rpx;
   color: #999999;
+  flex-shrink: 0;
 }
 
 .info-value {
   font-size: 28rpx;
   color: #333333;
   font-weight: 500;
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  word-break: break-all;
 }
 
 .info-value.cost {
@@ -256,6 +268,6 @@ export default {
 
 .action-buttons {
   margin-top: 40rpx;
-  margin-bottom: 60rpx;
+  margin-bottom: 0;
 }
 </style>

@@ -86,14 +86,22 @@ export default {
   min-height: 100vh;
   background: linear-gradient(180deg, #1a1a2e 0%, #16213e 40%, #f5f7f5 40%);
   padding: 0 40rpx;
+  padding-bottom: calc(40rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
 .admin-header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 120rpx;
+  width: 100%;
+  max-width: 680rpx;
+  margin: 0 auto;
+  padding-top: calc(72rpx + constant(safe-area-inset-top));
+  padding-top: calc(72rpx + env(safe-area-inset-top));
   padding-bottom: 60rpx;
+  box-sizing: border-box;
 }
 
 .logo-circle {
@@ -127,6 +135,10 @@ export default {
   border-radius: 24rpx;
   padding: 48rpx 36rpx;
   box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 680rpx;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .admin-footer {

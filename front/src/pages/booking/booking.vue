@@ -144,6 +144,12 @@ export default {
 .booking-page {
   min-height: 100vh;
   padding-top: 30rpx;
+  padding-bottom: calc(60rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(60rpx + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 960rpx;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .loading-state {
@@ -167,6 +173,7 @@ export default {
   border-radius: 12rpx;
   border: 2rpx solid transparent;
   transition: all 0.2s;
+  gap: 20rpx;
 }
 
 .plan-option.active {
@@ -178,6 +185,8 @@ export default {
   display: flex;
   align-items: center;
   gap: 20rpx;
+  flex: 1;
+  min-width: 0;
 }
 
 .radio-circle {
@@ -205,12 +214,17 @@ export default {
   font-size: 30rpx;
   font-weight: 500;
   color: #333333;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 .plan-option-price {
   font-size: 32rpx;
   font-weight: 600;
   color: #07c160;
+  flex-shrink: 0;
 }
 
 .summary-card {
@@ -220,9 +234,10 @@ export default {
 .summary-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 16rpx 0;
   border-bottom: 1rpx solid #f0f0f0;
+  gap: 20rpx;
 }
 
 .summary-row:last-child {
@@ -232,12 +247,17 @@ export default {
 .summary-label {
   font-size: 28rpx;
   color: #666666;
+  flex-shrink: 0;
 }
 
 .summary-value {
   font-size: 28rpx;
   font-weight: 500;
   color: #333333;
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  word-break: break-all;
 }
 
 .price-highlight {
@@ -248,6 +268,6 @@ export default {
 
 .confirm-btn {
   margin-top: 40rpx;
-  margin-bottom: 60rpx;
+  margin-bottom: 0;
 }
 </style>

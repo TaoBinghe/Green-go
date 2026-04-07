@@ -115,6 +115,15 @@ export default {
   background-color: #f5f7f5;
 }
 
+.container {
+  width: 100%;
+  max-width: 960rpx;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-bottom: calc(32rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+}
+
 .orders-header {
   background: linear-gradient(135deg, #07c160, #10b981);
   padding: 40rpx;
@@ -138,7 +147,8 @@ export default {
 
 .empty-btn {
   margin-top: 30rpx;
-  width: 360rpx;
+  width: 100%;
+  max-width: 360rpx;
 }
 
 .order-list {
@@ -153,15 +163,20 @@ export default {
 .order-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
   padding: 24rpx 30rpx;
   border-bottom: 1rpx solid #f0f0f0;
+  gap: 20rpx;
 }
 
 .order-id {
   font-size: 30rpx;
   font-weight: 600;
   color: #333333;
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
 }
 
 .order-card-body {
@@ -171,17 +186,24 @@ export default {
 .order-info-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   padding: 10rpx 0;
+  gap: 20rpx;
 }
 
 .order-info-label {
   font-size: 26rpx;
   color: #999999;
+  flex-shrink: 0;
 }
 
 .order-info-value {
   font-size: 26rpx;
   color: #333333;
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  word-break: break-all;
 }
 
 .order-info-value.price {
@@ -192,18 +214,23 @@ export default {
 .order-card-footer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 20rpx 30rpx;
   background-color: #fafafa;
+  gap: 20rpx;
 }
 
 .order-created {
   font-size: 24rpx;
   color: #bbbbbb;
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
 }
 
 .order-arrow {
   font-size: 30rpx;
   color: #cccccc;
+  flex-shrink: 0;
 }
 </style>

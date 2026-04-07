@@ -123,6 +123,16 @@ export default {
 .home-page {
   min-height: 100vh;
   background-color: #f5f7f5;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: 960rpx;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-bottom: calc(32rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
 }
 
 .banner {
@@ -130,12 +140,15 @@ export default {
   padding: 48rpx 40rpx;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 24rpx;
 }
 
 .banner-content {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
 .banner-title {
@@ -148,23 +161,28 @@ export default {
 .banner-desc {
   font-size: 26rpx;
   color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
 }
 
 .banner-icon {
   font-size: 80rpx;
+  flex-shrink: 0;
 }
 
 .quick-entry {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   padding: 36rpx 30rpx;
   margin-top: -20rpx;
+  gap: 24rpx;
 }
 
 .quick-entry-left {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
 .quick-entry-title {
@@ -194,10 +212,14 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 20rpx;
+  align-items: stretch;
 }
 
 .plan-card {
-  width: calc(50% - 10rpx);
+  flex: 1 1 280rpx;
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -242,6 +264,7 @@ export default {
 .plan-label {
   font-size: 24rpx;
   color: #999999;
+  text-align: center;
 }
 
 .login-hint {
