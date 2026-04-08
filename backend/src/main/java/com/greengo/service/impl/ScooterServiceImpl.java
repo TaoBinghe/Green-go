@@ -4,22 +4,33 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.binghetao.domain.Scooter;
 import com.binghetao.mapper.ScooterMapper;
+import com.binghetao.service.GeoAddressService;
 import com.binghetao.service.ScooterService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 public class ScooterServiceImpl extends ServiceImpl<ScooterMapper, Scooter> implements ScooterService {
 
+    @Autowired
+    private GeoAddressService geoAddressService;
+
     @Override
     public List<Scooter> listAll() {
-        return baseMapper.selectList(null);
+        List<Scooter> scooters = baseMapper.selectList(null);
+        scooters.forEach(this::hydrateLocationFromCoordinates);
+        return scooters;
     }
 
     @Override
     public boolean addScooter(Scooter scooter) {
         if (scooter == null || scooter.getScooterCode() == null || scooter.getScooterCode().isBlank()) {
+            return false;
+        }
+        if (!hasValidCoordinates(scooter)) {
             return false;
         }
 
@@ -32,6 +43,9 @@ public class ScooterServiceImpl extends ServiceImpl<ScooterMapper, Scooter> impl
 
         if (scooter.getStatus() == null || scooter.getStatus().isBlank()) {
             scooter.setStatus("AVAILABLE");
+        }
+        if (!hydrateLocationFromCoordinates(scooter)) {
+            return false;
         }
         return baseMapper.insert(scooter) > 0;
     }
@@ -65,6 +79,18 @@ public class ScooterServiceImpl extends ServiceImpl<ScooterMapper, Scooter> impl
         if (scooter.getLocation() != null) {
             existing.setLocation(scooter.getLocation());
         }
+        if (scooter.getLongitude() != null) {
+            existing.setLongitude(scooter.getLongitude());
+        }
+        if (scooter.getLatitude() != null) {
+            existing.setLatitude(scooter.getLatitude());
+        }
+        if (!hasValidCoordinates(existing)) {
+            return false;
+        }
+        if (!hydrateLocationFromCoordinates(existing)) {
+            return false;
+        }
 
         return baseMapper.updateById(existing) > 0;
     }
@@ -72,6 +98,28 @@ public class ScooterServiceImpl extends ServiceImpl<ScooterMapper, Scooter> impl
     @Override
     public boolean deleteScooter(Long id) {
         return baseMapper.deleteById(id) > 0;
+    }
+
+    private boolean hasValidCoordinates(Scooter scooter) {
+        if (scooter.getLongitude() == null || scooter.getLatitude() == null) {
+            return false;
+        }
+        return isBetween(scooter.getLongitude(), new BigDecimal("-180"), new BigDecimal("180"))
+                && isBetween(scooter.getLatitude(), new BigDecimal("-90"), new BigDecimal("90"));
+    }
+
+    private boolean hydrateLocationFromCoordinates(Scooter scooter) {
+        String resolvedLocation = geoAddressService.reverseGeocode(scooter.getLongitude(), scooter.getLatitude());
+        if (resolvedLocation == null || resolvedLocation.isBlank()) {
+            scooter.setLocation(null);
+            return false;
+        }
+        scooter.setLocation(resolvedLocation);
+        return true;
+    }
+
+    private boolean isBetween(BigDecimal value, BigDecimal min, BigDecimal max) {
+        return value.compareTo(min) >= 0 && value.compareTo(max) <= 0;
     }
 }
 

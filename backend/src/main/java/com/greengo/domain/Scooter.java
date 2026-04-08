@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -32,6 +33,12 @@ public class Scooter {
 
     /** Location name for map display */
     private String location;
+
+    /** GCJ-02 longitude for AMap */
+    private BigDecimal longitude;
+
+    /** GCJ-02 latitude for AMap */
+    private BigDecimal latitude;
 
     private LocalDateTime createdAt;
 

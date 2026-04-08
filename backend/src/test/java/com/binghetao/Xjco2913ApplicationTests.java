@@ -1,6 +1,5 @@
-package com.greengo;
+package com.binghetao;
 
-import com.binghetao.Xjco2913Application;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -10,5 +9,4 @@ class Xjco2913ApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }

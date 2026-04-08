@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS `scooter` (
     `scooter_code` VARCHAR(32) NOT NULL COMMENT 'Business-unique code, e.g. SC001',
     `status` VARCHAR(32) NOT NULL DEFAULT 'AVAILABLE' COMMENT 'Status: AVAILABLE/UNAVAILABLE',
     `location` VARCHAR(128) DEFAULT NULL COMMENT 'Location name',
+    `longitude` DECIMAL(10, 6) DEFAULT NULL COMMENT 'GCJ-02 longitude for map display',
+    `latitude` DECIMAL(10, 6) DEFAULT NULL COMMENT 'GCJ-02 latitude for map display',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
@@ -85,15 +87,19 @@ INSERT INTO `pricing_plan` (`hire_period`, `price`) VALUES
 ON DUPLICATE KEY UPDATE `price` = VALUES(`price`);
 
 -- Initial scooter data (10 scooters)
-INSERT INTO `scooter` (`scooter_code`, `status`, `location`) VALUES
-    ('SC001', 'AVAILABLE', 'Campus North Gate'),
-    ('SC002', 'AVAILABLE', 'Library Plaza'),
-    ('SC003', 'AVAILABLE', 'Sports Center'),
-    ('SC004', 'AVAILABLE', 'Student Dorm A'),
-    ('SC005', 'AVAILABLE', 'Campus South Gate'),
-    ('SC006', 'AVAILABLE', 'Cafeteria Square'),
-    ('SC007', 'AVAILABLE', 'Teaching Building B'),
-    ('SC008', 'AVAILABLE', 'Parking Lot P1'),
-    ('SC009', 'AVAILABLE', 'Main Entrance'),
-    ('SC010', 'AVAILABLE', 'Gymnasium')
-ON DUPLICATE KEY UPDATE `status` = VALUES(`status`), `location` = VALUES(`location`);
+INSERT INTO `scooter` (`scooter_code`, `status`, `location`, `longitude`, `latitude`) VALUES
+    ('SC001', 'AVAILABLE', 'Campus North Gate', 113.323912, 23.097891),
+    ('SC002', 'AVAILABLE', 'Library Plaza', 113.324865, 23.098214),
+    ('SC003', 'AVAILABLE', 'Sports Center', 113.325742, 23.096845),
+    ('SC004', 'AVAILABLE', 'Student Dorm A', 113.322768, 23.095932),
+    ('SC005', 'AVAILABLE', 'Campus South Gate', 113.321954, 23.094821),
+    ('SC006', 'AVAILABLE', 'Cafeteria Square', 113.323247, 23.096374),
+    ('SC007', 'AVAILABLE', 'Teaching Building B', 113.326184, 23.097402),
+    ('SC008', 'AVAILABLE', 'Parking Lot P1', 113.327015, 23.095648),
+    ('SC009', 'AVAILABLE', 'Main Entrance', 113.320986, 23.098653),
+    ('SC010', 'AVAILABLE', 'Gymnasium', 113.325116, 23.094973)
+ON DUPLICATE KEY UPDATE
+    `status` = VALUES(`status`),
+    `location` = VALUES(`location`),
+    `longitude` = VALUES(`longitude`),
+    `latitude` = VALUES(`latitude`);

@@ -28,21 +28,23 @@ public class BookingController {
     // Create booking for scooter and period
     @PostMapping
     public Result<?> bookScooter(@RequestParam Integer scooterId, @RequestParam String hiredPeriod) {
-        boolean success = bookingService.bookScooter(scooterId, hiredPeriod);
-        if (success) {
+        try {
+            bookingService.bookScooter(scooterId, hiredPeriod);
             return Result.success();
+        } catch (IllegalArgumentException e) {
+            return Result.error(e.getMessage());
         }
-        return Result.error("Scooter is not available for the requested period");
     }
 
     // Activate booking after user confirms
     @PostMapping("/activate")
     public Result<?> activateBooking(@RequestParam Long bookingId) {
-        boolean success = bookingService.activateBooking(bookingId);
-        if (success) {
+        try {
+            bookingService.activateBooking(bookingId);
             return Result.success();
+        } catch (IllegalArgumentException e) {
+            return Result.error(e.getMessage());
         }
-        return Result.error("Cannot activate this booking");
     }
 
     // Cancel a pending booking before it becomes active

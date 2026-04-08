@@ -3,8 +3,10 @@ package com.binghetao.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.binghetao.domain.Booking;
 import com.binghetao.domain.Payment;
+import com.binghetao.domain.Scooter;
 import com.binghetao.mapper.BookingMapper;
 import com.binghetao.mapper.PaymentMapper;
+import com.binghetao.mapper.ScooterMapper;
 import com.binghetao.service.PaymentService;
 import com.binghetao.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +20,18 @@ import java.util.UUID;
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
+    private static final String BOOKING_STATUS_ACTIVE = "ACTIVE";
+    private static final String BOOKING_STATUS_COMPLETED = "COMPLETED";
+    private static final String SCOOTER_STATUS_AVAILABLE = "AVAILABLE";
+
     @Autowired
     private PaymentMapper paymentMapper;
 
     @Autowired
     private BookingMapper bookingMapper;
+
+    @Autowired
+    private ScooterMapper scooterMapper;
 
     @Override
     @Transactional
@@ -39,7 +48,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (!booking.getUserId().equals(userId)) {
             throw new IllegalArgumentException("Not your booking");
         }
-        if (!"ACTIVE".equals(booking.getStatus())) {
+        if (!BOOKING_STATUS_ACTIVE.equals(booking.getStatus())) {
             throw new IllegalArgumentException("Booking status must be ACTIVE");
         }
 
@@ -62,16 +71,25 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setPaymentTime(LocalDateTime.now());
 
         // 5. Persist payment record
-        paymentMapper.insert(payment);
-
-        // 6. Update booking status
-        if("SUCCESS".equals(payment.getStatus())) {
-            booking.setStatus("COMPLETED");
-        }else if("FAILED".equals(payment.getStatus())) {
-            booking.setStatus("CANCELLED");
+        if (paymentMapper.insert(payment) <= 0) {
+            throw new IllegalArgumentException("Failed to create payment");
         }
 
-        bookingMapper.updateById(booking);
+        // 6. Complete the booking and release the scooter in the same transaction.
+        if ("SUCCESS".equals(payment.getStatus())) {
+            booking.setEndTime(LocalDateTime.now());
+            booking.setStatus(BOOKING_STATUS_COMPLETED);
+            if (bookingMapper.updateById(booking) <= 0) {
+                throw new IllegalArgumentException("Failed to complete booking");
+            }
+
+            Scooter scooter = new Scooter();
+            scooter.setId(booking.getScooterId());
+            scooter.setStatus(SCOOTER_STATUS_AVAILABLE);
+            if (scooterMapper.updateById(scooter) <= 0) {
+                throw new IllegalArgumentException("Scooter not found");
+            }
+        }
 
         return payment;
     }
