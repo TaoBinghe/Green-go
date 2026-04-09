@@ -1,7 +1,7 @@
-package com.binghetao.service;
+package com.greengo.service;
 
-import com.binghetao.domain.Booking;
-import com.binghetao.domain.PricingPlan;
+import com.greengo.domain.Booking;
+import com.greengo.domain.PricingPlan;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,14 +17,20 @@ public interface BookingService {
     // Book scooter for given period
     boolean bookScooter(Integer scooterId, String hiredPeriod);
 
-    // Switch booking status between PENDING and ACTIVATED
+    // Legacy status toggle endpoint used by the existing front-end order detail page
     boolean updateBookingStatus(Long bookingId, String status);
 
     // Activate a pending booking
     boolean activateBooking(Long bookingId);
 
+    // Change the hire period of a pending booking owned by the current user
+    Booking modifyBookingPeriod(Long bookingId, String hiredPeriod);
+
     // Cancel a pending booking owned by the current user
     Booking cancelBooking(Long bookingId);
+
+    // Extend an active booking owned by the current user by another fixed hire period
+    Booking renewBooking(Long bookingId, String hiredPeriod);
 
     // Finish an active booking, pay for it, and return the updated booking and payment
     Map<String, Object> finishBooking(Long bookingId);
@@ -32,3 +38,4 @@ public interface BookingService {
     // List bookings by user id, newest first
     List<Booking> listBookingsByUserId(Long userId);
 }
+

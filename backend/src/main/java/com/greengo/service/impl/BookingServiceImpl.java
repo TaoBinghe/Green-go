@@ -103,6 +103,28 @@ public class BookingServiceImpl extends ServiceImpl<BookingMapper, Booking> impl
 
     @Override
     @Transactional
+    public boolean updateBookingStatus(Long bookingId, String status) {
+        String targetStatus = normalizeLegacyBookingStatus(status);
+        Booking booking = getOwnedBooking(bookingId);
+        if (targetStatus.equals(booking.getStatus())) {
+            return true;
+        }
+        if (BOOKING_STATUS_ACTIVE.equals(targetStatus)) {
+            return activateBooking(bookingId);
+        }
+        if (!BOOKING_STATUS_ACTIVE.equals(booking.getStatus())) {
+            throw new IllegalArgumentException("Only active bookings can be switched back to pending");
+        }
+
+        booking.setStatus(BOOKING_STATUS_PENDING);
+        if (baseMapper.updateById(booking) <= 0) {
+            throw new IllegalArgumentException("Failed to update booking status");
+        }
+        return true;
+    }
+
+    @Override
+    @Transactional
     public Booking modifyBookingPeriod(Long bookingId, String hiredPeriod) {
         Booking booking = getOwnedBooking(bookingId);
         if (!BOOKING_STATUS_PENDING.equals(booking.getStatus())) {
@@ -213,6 +235,19 @@ public class BookingServiceImpl extends ServiceImpl<BookingMapper, Booking> impl
             throw new IllegalArgumentException("Pricing plan not found");
         }
         return pricingPlan;
+    }
+
+    private String normalizeLegacyBookingStatus(String status) {
+        if (status == null || status.isBlank()) {
+            throw new IllegalArgumentException("Booking status is missing");
+        }
+        if ("ACTIVATED".equalsIgnoreCase(status) || BOOKING_STATUS_ACTIVE.equalsIgnoreCase(status)) {
+            return BOOKING_STATUS_ACTIVE;
+        }
+        if (BOOKING_STATUS_PENDING.equalsIgnoreCase(status)) {
+            return BOOKING_STATUS_PENDING;
+        }
+        throw new IllegalArgumentException("Unsupported booking status");
     }
 
     private void assertPricingPlanHasPrice(PricingPlan pricingPlan) {

@@ -36,14 +36,18 @@ public class BookingController {
         }
     }
 
-    // Switch booking status between ACTIVATED and PENDING
+    // Legacy status toggle endpoint used by the existing front-end order detail page
     @PostMapping("/status")
     public Result<?> updateBookingStatus(@RequestParam Long bookingId, @RequestParam String status) {
-        boolean success = bookingService.updateBookingStatus(bookingId, status);
-        if (success) {
-            return Result.success();
+        try {
+            boolean success = bookingService.updateBookingStatus(bookingId, status);
+            if (success) {
+                return Result.success();
+            }
+            return Result.error("Cannot update this booking status");
+        } catch (IllegalArgumentException e) {
+            return Result.error(e.getMessage());
         }
-        return Result.error("Cannot update this booking status");
     }
 
     // Activate a pending booking

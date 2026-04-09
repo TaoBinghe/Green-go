@@ -100,6 +100,41 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void updateBookingStatusMapsActivatedToActive() {
+        Booking booking = Booking.builder()
+                .id(10L)
+                .userId(1L)
+                .status("PENDING")
+                .build();
+        when(bookingMapper.selectById(10L)).thenReturn(booking, booking);
+        when(bookingMapper.selectCount(any())).thenReturn(0L);
+        when(bookingMapper.updateById(booking)).thenReturn(1);
+
+        boolean updated = bookingService.updateBookingStatus(10L, "ACTIVATED");
+
+        assertTrue(updated);
+        assertEquals("ACTIVE", booking.getStatus());
+        verify(bookingMapper).updateById(booking);
+    }
+
+    @Test
+    void updateBookingStatusSwitchesActiveBookingBackToPending() {
+        Booking booking = Booking.builder()
+                .id(10L)
+                .userId(1L)
+                .status("ACTIVE")
+                .build();
+        when(bookingMapper.selectById(10L)).thenReturn(booking);
+        when(bookingMapper.updateById(booking)).thenReturn(1);
+
+        boolean updated = bookingService.updateBookingStatus(10L, "PENDING");
+
+        assertTrue(updated);
+        assertEquals("PENDING", booking.getStatus());
+        verify(bookingMapper).updateById(booking);
+    }
+
+    @Test
     void modifyBookingPeriodUpdatesPendingBookingWithNewPlan() {
         LocalDateTime startTime = LocalDateTime.now();
         Booking booking = Booking.builder()
