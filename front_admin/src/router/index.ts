@@ -38,6 +38,12 @@ const router = createRouter({
           name: 'Pricing',
           component: () => import('@/views/Pricing.vue'),
           meta: { title: 'Pricing Plans', icon: 'PriceTag' }
+        },
+        {
+          path: 'revenue',
+          name: 'Revenue',
+          component: () => import('@/views/Revenue.vue'),
+          meta: { title: 'Weekly Revenue', icon: 'Histogram' }
         }
       ]
     }

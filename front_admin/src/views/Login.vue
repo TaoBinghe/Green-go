@@ -96,11 +96,11 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1d1e1f 0%, #2c3e50 100%);
+  background: #1f2937;
 }
 
 .login-card {
-  width: 420px;
+  width: min(420px, calc(100vw - 32px));
   background: #fff;
   border-radius: 12px;
   padding: 48px 40px;
@@ -134,5 +134,11 @@ async function handleLogin() {
 .login-btn:hover {
   background-color: #06ad56;
   border-color: #06ad56;
+}
+
+@media (max-width: 640px) {
+  .login-card {
+    padding: 32px 20px;
+  }
 }
 </style>

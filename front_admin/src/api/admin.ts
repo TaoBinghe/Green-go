@@ -15,7 +15,19 @@ export interface ScooterDto {
   id?: number
   scooterCode: string
   status: string
-  location: string
+  location: string | null
+  longitude: number | null
+  latitude: number | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface ScooterUpsertPayload {
+  id?: number
+  scooterCode: string
+  status?: string
+  longitude: number
+  latitude: number
 }
 
 export function adminLogin(username: string, password: string) {
@@ -41,7 +53,15 @@ export function listScooters() {
   })
 }
 
-export function addScooter(data: { scooterCode: string; status?: string; location?: string }) {
+export function resolveScooterLocation(longitude: number, latitude: number) {
+  return request<ApiResponse<string>>({
+    url: '/admin/scooter/resolve-location',
+    method: 'get',
+    params: { longitude, latitude }
+  })
+}
+
+export function addScooter(data: ScooterUpsertPayload) {
   return request({
     url: '/admin/scooter/add',
     method: 'post',
@@ -49,7 +69,7 @@ export function addScooter(data: { scooterCode: string; status?: string; locatio
   })
 }
 
-export function updateScooter(data: { id: number; scooterCode?: string; status?: string; location?: string }) {
+export function updateScooter(data: ScooterUpsertPayload & { id: number }) {
   return request({
     url: '/admin/scooter/update',
     method: 'post',
@@ -72,6 +92,19 @@ export interface PricingPlanDto {
   hirePeriod: string
   price: number
   updatedAt?: string
+}
+
+export interface AdminWeeklyRevenueBucket {
+  hirePeriod: string
+  orderCount: number
+  totalRevenue: number
+}
+
+export interface AdminWeeklyRevenueSummary {
+  windowStart: string
+  windowEnd: string
+  mostPopularHirePeriod: string | null
+  buckets: AdminWeeklyRevenueBucket[]
 }
 
 export function getPricingPlanList() {
@@ -108,5 +141,12 @@ export function deletePricingPlan(id: number) {
   return request({
     url: `/admin/pricing-plans/${id}`,
     method: 'delete'
+  })
+}
+
+export function getWeeklyRevenueSummary() {
+  return request<ApiResponse<AdminWeeklyRevenueSummary>>({
+    url: '/admin/revenue/weekly',
+    method: 'get'
   })
 }
