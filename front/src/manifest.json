@@ -65,6 +65,15 @@
     "mp-toutiao" : {
         "usingComponents" : true
     },
+    "h5" : {
+        "sdkConfigs" : {
+            "maps" : {
+                "amap" : {
+                    "key" : "183a163e2b815dd72eda8f860692640b"
+                }
+            }
+        }
+    },
     "uniStatistics": {  
         "enable": false
     },

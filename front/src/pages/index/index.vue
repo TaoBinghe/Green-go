@@ -14,7 +14,6 @@
           <text class="home-cta-title">Start a Ride</text>
           <text class="home-cta-desc">Book a scooter in a few taps and get moving right away.</text>
         </view>
-        <text class="home-cta-pill">Explore</text>
       </view>
 
       <view class="theme-section-head">
@@ -27,17 +26,22 @@
         <text>Loading plans...</text>
       </view>
 
-      <view v-else class="plan-grid">
+      <view v-else-if="plans.length" class="plan-grid">
         <view
-          class="card plan-card"
           v-for="plan in plans"
           :key="plan.id"
+          class="card plan-card"
           @click="goBookingWithPlan(plan)"
         >
-          <view class="plan-badge">{{ formatPeriod(plan.hirePeriod) }}</view>
-          <text class="plan-price">£{{ plan.price.toFixed(2) }}</text>
-          <text class="plan-label">{{ formatPeriodLabel(plan.hirePeriod) }}</text>
+          <view class="plan-badge">{{ formatPeriodBadge(plan.hirePeriod) }}</view>
+          <text class="plan-price">{{ formatCurrency(plan.price) }}</text>
+          <text class="plan-label">{{ formatPeriod(plan.hirePeriod) }}</text>
         </view>
+      </view>
+
+      <view v-else class="card pricing-empty-card">
+        <text class="pricing-empty-title">Sign in to view live pricing</text>
+        <text class="pricing-empty-copy">Sprint 2 pricing plans come from your account-backed booking API, so we only load the latest prices after login.</text>
       </view>
 
       <view v-if="!isLoggedIn" class="card login-card" @click="goLogin">
@@ -55,6 +59,7 @@
 <script>
 import { getPricingPlans } from '@/api/booking'
 import loginBackground from '@/static/login_background.png'
+import { formatCurrency, formatPeriod, formatPeriodBadge, sortPricingPlans } from '@/utils/booking'
 import { getToken } from '@/utils/auth'
 
 export default {
@@ -68,14 +73,19 @@ export default {
   },
   onShow() {
     this.isLoggedIn = !!getToken()
-    this.loadPlans()
+    if (this.isLoggedIn) {
+      this.loadPlans()
+    } else {
+      this.plans = []
+      this.loading = false
+    }
   },
   methods: {
     async loadPlans() {
       this.loading = true
       try {
         const res = await getPricingPlans()
-        this.plans = res.data || []
+        this.plans = sortPricingPlans(res.data || [])
       } catch (e) {
         this.plans = []
       } finally {
@@ -83,22 +93,13 @@ export default {
       }
     },
     formatPeriod(period) {
-      const map = {
-        HOUR_1: '1H',
-        HOUR_4: '4H',
-        DAY_1: '1D',
-        WEEK_1: '7D'
-      }
-      return map[period] || period
+      return formatPeriod(period)
     },
-    formatPeriodLabel(period) {
-      const map = {
-        HOUR_1: '1 Hour',
-        HOUR_4: '4 Hours',
-        DAY_1: '1 Day',
-        WEEK_1: '1 Week'
-      }
-      return map[period] || period
+    formatPeriodBadge(period) {
+      return formatPeriodBadge(period)
+    },
+    formatCurrency(value) {
+      return formatCurrency(value)
     },
     goBooking() {
       if (!this.isLoggedIn) {
@@ -173,6 +174,25 @@ export default {
   color: #7d8677;
 }
 
+.pricing-empty-card {
+  text-align: left;
+}
+
+.pricing-empty-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111111;
+}
+
+.pricing-empty-copy {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #7d8677;
+}
+
 .plan-grid {
   display: flex;
   flex-wrap: wrap;
@@ -237,14 +257,6 @@ export default {
 .home-illustration-block {
   margin-top: 36rpx;
   padding-top: 12rpx;
-}
-
-.home-illustration-note {
-  display: block;
-  margin-bottom: 18rpx;
-  font-size: 24rpx;
-  text-align: center;
-  color: #98a093;
 }
 
 .home-illustration {

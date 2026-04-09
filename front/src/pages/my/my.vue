@@ -90,6 +90,8 @@ export default {
       uni.showModal({
         title: 'Logout',
         content: 'Are you sure you want to logout?',
+        confirmText: 'Confirm',
+        cancelText: 'Cancel',
         success: (res) => {
           if (res.confirm) {
             clearAll()

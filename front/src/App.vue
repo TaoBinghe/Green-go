@@ -260,6 +260,16 @@ image {
   color: #c85c55;
 }
 
+.status-available {
+  background: #effad7;
+  color: #5d8c22;
+}
+
+.status-unavailable {
+  background: #f2f4ef;
+  color: #7d8677;
+}
+
 .link-text {
   color: #24311f;
   font-size: 28rpx;

@@ -7,7 +7,7 @@
       <view class="theme-hero">
         <text class="theme-kicker">BOOKING HISTORY</text>
         <text class="theme-headline">Orders</text>
-        <text class="theme-copy">{{ ordersSummary }}</text>
+        <text v-if="ordersSummary" class="theme-copy">{{ ordersSummary }}</text>
       </view>
 
       <view v-if="loading" class="card loading-card">
@@ -20,44 +20,111 @@
         <button class="btn-outline empty-btn" @click="goHome">Book a Scooter</button>
       </view>
 
-      <view v-else class="order-list">
-        <view
-          class="card order-card"
-          v-for="order in orders"
-          :key="order.id"
-          @click="goDetail(order)"
-        >
-          <view class="order-card-header">
-            <view class="order-header-copy">
-              <text class="order-id">Order #{{ order.id }}</text>
-              <text class="order-created">Created {{ formatTime(order.createdAt) }}</text>
-            </view>
-            <text class="status-badge" :class="'status-' + normalizeStatus(order.status).toLowerCase()">
-              {{ normalizeStatus(order.status) }}
-            </text>
-          </view>
-
-          <view class="order-details">
-            <view class="order-row">
-              <text class="order-label">Scooter</text>
-              <text class="order-value">#{{ order.scooterId }}</text>
-            </view>
-            <view class="order-row">
-              <text class="order-label">Cost</text>
-              <text class="order-value order-value-strong">£{{ order.totalCost.toFixed(2) }}</text>
-            </view>
-            <view class="order-row">
-              <text class="order-label">Start</text>
-              <text class="order-value">{{ formatTime(order.startTime) }}</text>
-            </view>
-            <view class="order-row">
-              <text class="order-label">End</text>
-              <text class="order-value">{{ formatTime(order.endTime) }}</text>
+      <view v-else class="orders-content">
+        <view v-if="currentOrders.length" class="orders-section">
+          <view class="theme-section-head orders-section-head">
+            <view>
+              <text class="section-title">Current Orders</text>
+              <text class="theme-section-note">Pending and active rides stay here until they close.</text>
             </view>
           </view>
 
-          <view class="order-footer">
-            <text class="order-link">View details</text>
+          <view class="order-list">
+            <view
+              v-for="order in currentOrders"
+              :key="order.id"
+              class="card order-card"
+              @click="goDetail(order)"
+            >
+              <view class="order-card-header">
+                <view class="order-header-copy">
+                  <text class="order-id">Order #{{ order.id }}</text>
+                  <text class="order-created">Created {{ formatTime(order.createdAt) }}</text>
+                </view>
+                <text class="status-badge" :class="'status-' + order.status.toLowerCase()">
+                  {{ order.status }}
+                </text>
+              </view>
+
+              <view class="order-details">
+                <view class="order-row">
+                  <text class="order-label">Scooter</text>
+                  <text class="order-value">{{ order.scooterCode }}</text>
+                </view>
+                <view class="order-row">
+                  <text class="order-label">Location</text>
+                  <text class="order-value">{{ order.scooterLocation }}</text>
+                </view>
+                <view class="order-row">
+                  <text class="order-label">Plan</text>
+                  <text class="order-value">{{ order.hiredPeriodLabel }}</text>
+                </view>
+                <view class="order-row">
+                  <text class="order-label">Cost</text>
+                  <text class="order-value order-value-strong">{{ formatCurrency(order.totalCostValue) }}</text>
+                </view>
+                <view class="order-row">
+                  <text class="order-label">End</text>
+                  <text class="order-value">{{ formatTime(order.endTime) }}</text>
+                </view>
+              </view>
+
+              <view class="order-footer">
+                <text class="order-link">Manage ride</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view v-if="historyOrders.length" class="orders-section">
+          <view class="theme-section-head orders-section-head">
+    
+          </view>
+
+          <view class="order-list">
+            <view
+              v-for="order in historyOrders"
+              :key="order.id"
+              class="card order-card"
+              @click="goDetail(order)"
+            >
+              <view class="order-card-header">
+                <view class="order-header-copy">
+                  <text class="order-id">Order #{{ order.id }}</text>
+                  <text class="order-created">Created {{ formatTime(order.createdAt) }}</text>
+                </view>
+                <text class="status-badge" :class="'status-' + order.status.toLowerCase()">
+                  {{ order.status }}
+                </text>
+              </view>
+
+              <view class="order-details">
+                <view class="order-row">
+                  <text class="order-label">Scooter</text>
+                  <text class="order-value">{{ order.scooterCode }}</text>
+                </view>
+                <view class="order-row">
+                  <text class="order-label">Location</text>
+                  <text class="order-value">{{ order.scooterLocation }}</text>
+                </view>
+                <view class="order-row">
+                  <text class="order-label">Plan</text>
+                  <text class="order-value">{{ order.hiredPeriodLabel }}</text>
+                </view>
+                <view class="order-row">
+                  <text class="order-label">Paid</text>
+                  <text class="order-value order-value-strong">{{ formatCurrency(order.totalCostValue) }}</text>
+                </view>
+                <view class="order-row">
+                  <text class="order-label">Closed</text>
+                  <text class="order-value">{{ formatTime(order.updatedAt || order.endTime) }}</text>
+                </view>
+              </view>
+
+              <view class="order-footer">
+                <text class="order-link">View details</text>
+              </view>
+            </view>
           </view>
         </view>
       </view>
@@ -66,7 +133,17 @@
 </template>
 
 <script>
+import { getPricingPlans } from '@/api/booking'
+import { getScooterList } from '@/api/scooter'
 import { getMyOrders } from '@/api/user'
+import {
+  buildBookingViewModel,
+  buildEntityMap,
+  formatCurrency,
+  formatTime,
+  isOpenBooking,
+  sortPricingPlans
+} from '@/utils/booking'
 import { getToken } from '@/utils/auth'
 
 export default {
@@ -77,14 +154,20 @@ export default {
     }
   },
   computed: {
+    currentOrders() {
+      return this.orders.filter(order => isOpenBooking(order.status))
+    },
+    historyOrders() {
+      return this.orders.filter(order => !isOpenBooking(order.status))
+    },
     ordersSummary() {
       if (this.loading) {
-        return 'Loading your latest bookings and payment states.'
+        return 'Loading the latest ride states, scooter locations, and pricing references.'
       }
       if (!this.orders.length) {
-        return 'Keep track of bookings, lock and activate states, and completed rides in one clean view.'
+        return 'Keep pending rides, active trips, and finished orders in one clean timeline.'
       }
-      return `${this.orders.length} booking(s) ready to review, switch status, or pay.`
+      return ''
     }
   },
   onShow() {
@@ -98,8 +181,15 @@ export default {
     async loadOrders() {
       this.loading = true
       try {
-        const res = await getMyOrders()
-        this.orders = res.data || []
+        const [ordersRes, scootersRes, pricingPlansRes] = await Promise.all([
+          getMyOrders(),
+          getScooterList(),
+          getPricingPlans()
+        ])
+
+        const scooterMap = buildEntityMap(scootersRes.data || [])
+        const pricingPlanMap = buildEntityMap(sortPricingPlans(pricingPlansRes.data || []))
+        this.orders = (ordersRes.data || []).map(order => buildBookingViewModel(order, scooterMap, pricingPlanMap))
       } catch (e) {
         this.orders = []
       } finally {
@@ -107,15 +197,14 @@ export default {
       }
     },
     formatTime(timeStr) {
-      if (!timeStr) return '-'
-      return timeStr.replace('T', ' ').substring(0, 16)
+      return formatTime(timeStr)
     },
-    normalizeStatus(status) {
-      return status === 'ACTIVE' ? 'ACTIVATED' : status
+    formatCurrency(value) {
+      return formatCurrency(value)
     },
     goDetail(order) {
       uni.navigateTo({
-        url: `/pages/order-detail/order-detail?order=${encodeURIComponent(JSON.stringify(order))}`
+        url: `/pages/order-detail/order-detail?bookingId=${order.id}`
       })
     },
     goHome() {
@@ -151,8 +240,20 @@ export default {
   margin-top: 28rpx;
 }
 
+.orders-content {
+  margin-top: 10rpx;
+}
+
+.orders-section {
+  margin-top: 18rpx;
+}
+
+.orders-section-head {
+  margin-top: 0;
+}
+
 .order-list {
-  margin-top: 34rpx;
+  margin-top: 8rpx;
 }
 
 .order-card {

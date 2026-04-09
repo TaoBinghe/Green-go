@@ -1,6 +1,7 @@
 import { getToken, removeToken } from './auth'
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '')
+const ABSOLUTE_HTTP_URL_RE = /^https?:\/\//i
 
 function buildQueryString(params) {
   return Object.keys(params)
@@ -16,6 +17,14 @@ export function request(options) {
     uni.showToast({ title: 'API address not configured', icon: 'none' })
     return Promise.reject(error)
   }
+
+  // #ifdef MP
+  if (!ABSOLUTE_HTTP_URL_RE.test(BASE_URL)) {
+    const error = new Error(`Mini program requests need an absolute API URL, got: ${BASE_URL}`)
+    uni.showToast({ title: 'Mini program needs full API URL', icon: 'none' })
+    return Promise.reject(error)
+  }
+  // #endif
 
   const header = {}
   const token = getToken()

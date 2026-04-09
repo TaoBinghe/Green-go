@@ -39,7 +39,7 @@
 		{
 			"path": "pages/booking/booking",
 			"style": {
-				"navigationBarTitleText": "Book a Scooter"
+				"navigationStyle": "custom"
 			}
 		},
 		{
