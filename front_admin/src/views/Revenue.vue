@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h2 class="page-heading">Weekly Revenue</h2>
-        <p class="page-copy">Sprint 2 revenue summary grouped by the fixed hire periods.</p>
+        <p class="page-copy">Weekly revenue summary grouped by the current hire periods.</p>
       </div>
       <el-button :loading="loading" @click="loadSummary">
         <el-icon><Refresh /></el-icon>
@@ -123,7 +123,7 @@
           <template #header>
             <div class="card-header">
               <span class="card-title">Revenue Buckets</span>
-              <span class="card-note">Every fixed hire period is rendered, even when no orders exist.</span>
+              <span class="card-note">Every current hire period is rendered, even when no orders exist.</span>
             </div>
           </template>
 

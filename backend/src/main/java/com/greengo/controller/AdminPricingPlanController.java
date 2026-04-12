@@ -4,6 +4,7 @@ import com.greengo.domain.PricingPlan;
 import com.greengo.domain.Result;
 import com.greengo.service.PricingPlanService;
 import com.greengo.utils.AuthUtil;
+import com.greengo.utils.PricingPlanPeriodUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +46,9 @@ public class AdminPricingPlanController {
         if (plan.getHirePeriod() == null || plan.getHirePeriod().isBlank()) {
             return Result.error("Hire period cannot be blank");
         }
+        if (!PricingPlanPeriodUtil.isSupportedHirePeriod(plan.getHirePeriod())) {
+            return Result.error(PricingPlanPeriodUtil.formatHint());
+        }
         if (plan.getPrice() == null || plan.getPrice().compareTo(java.math.BigDecimal.ZERO) <= 0) {
             return Result.error("Price must be greater than 0");
         }
@@ -59,6 +63,9 @@ public class AdminPricingPlanController {
     public Result<?> update(@PathVariable Long id, @RequestBody PricingPlan plan) {
         if (!AuthUtil.isAdmin()) {
             return Result.error("Forbidden: admin only");
+        }
+        if (plan.getHirePeriod() != null && !PricingPlanPeriodUtil.isSupportedHirePeriod(plan.getHirePeriod())) {
+            return Result.error(PricingPlanPeriodUtil.formatHint());
         }
         if (plan.getPrice() != null && plan.getPrice().compareTo(java.math.BigDecimal.ZERO) <= 0) {
             return Result.error("Price must be greater than 0");

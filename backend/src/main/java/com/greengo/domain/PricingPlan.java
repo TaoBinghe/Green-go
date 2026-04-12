@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 /**
  * Pricing plan entity.
- * Four hire periods: 1hr, 4hrs, 1day, 1week.
+ * Hire periods use UNIT_NUMBER codes such as HOUR_1 or DAY_3.
  */
 @Data
 @Builder
@@ -26,7 +26,7 @@ public class PricingPlan {
     private Long id;
 
 
-    /** Hire period: HOUR_1 / HOUR_4 / DAY_1 / WEEK_1 */
+    /** Hire period code in UNIT_NUMBER format, e.g. HOUR_1 or DAY_3. */
     private String hirePeriod;
 
     private BigDecimal price;

@@ -165,6 +165,35 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void modifyBookingPeriodSupportsCustomPlanDurations() {
+        LocalDateTime startTime = LocalDateTime.of(2026, 4, 12, 9, 0);
+        Booking booking = Booking.builder()
+                .id(10L)
+                .userId(1L)
+                .pricingPlanId(2L)
+                .startTime(startTime)
+                .endTime(startTime.plusHours(1))
+                .totalCost(new BigDecimal("5.00"))
+                .status("PENDING")
+                .build();
+        PricingPlan newPlan = PricingPlan.builder()
+                .id(5L)
+                .hirePeriod("DAY_3")
+                .price(new BigDecimal("66.00"))
+                .build();
+        when(bookingMapper.selectById(10L)).thenReturn(booking);
+        when(pricingPlanMapper.selectOne(any())).thenReturn(newPlan);
+        when(bookingMapper.updateById(booking)).thenReturn(1);
+
+        Booking updated = bookingService.modifyBookingPeriod(10L, "day_3");
+
+        assertEquals(5L, updated.getPricingPlanId());
+        assertEquals(startTime.plusDays(3), updated.getEndTime());
+        assertEquals(new BigDecimal("66.00"), updated.getTotalCost());
+        verify(bookingMapper).updateById(booking);
+    }
+
+    @Test
     void modifyBookingPeriodRejectsActiveBooking() {
         Booking booking = Booking.builder()
                 .id(10L)
@@ -388,7 +417,6 @@ class BookingServiceImplTest {
                 .status("ACTIVE")
                 .build();
         when(bookingMapper.selectById(10L)).thenReturn(booking);
-        when(pricingPlanMapper.selectOne(any())).thenReturn(null);
 
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
                 () -> bookingService.renewBooking(10L, "UNKNOWN"));

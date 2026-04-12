@@ -3,6 +3,8 @@ package com.greengo.impl;
 import com.greengo.domain.AdminWeeklyRevenueBucket;
 import com.greengo.domain.AdminWeeklyRevenueSummary;
 import com.greengo.mapper.PaymentMapper;
+import com.greengo.mapper.PricingPlanMapper;
+import com.greengo.domain.PricingPlan;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,18 +31,22 @@ class AdminRevenueServiceImplTest {
     @Mock
     private PaymentMapper paymentMapper;
 
+    @Mock
+    private PricingPlanMapper pricingPlanMapper;
+
     private com.greengo.service.impl.AdminRevenueServiceImpl adminRevenueService;
 
     @BeforeEach
     void setUp() {
         adminRevenueService = new com.greengo.service.impl.AdminRevenueServiceImpl();
         ReflectionTestUtils.setField(adminRevenueService, "paymentMapper", paymentMapper);
+        ReflectionTestUtils.setField(adminRevenueService, "pricingPlanMapper", pricingPlanMapper);
         ReflectionTestUtils.setField(adminRevenueService, "clock",
                 Clock.fixed(Instant.parse("2026-04-09T12:00:00Z"), ZoneOffset.UTC));
     }
 
     @Test
-    void getWeeklyRevenueSummaryReturnsAllBucketsInFixedOrder() {
+    void getWeeklyRevenueSummaryReturnsAllBucketsInDurationOrder() {
         when(paymentMapper.selectWeeklyRevenueBuckets(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
                 .thenReturn(List.of(
                         AdminWeeklyRevenueBucket.builder()
@@ -53,6 +59,13 @@ class AdminRevenueServiceImplTest {
                                 .orderCount(1L)
                                 .totalRevenue(new BigDecimal("30.00"))
                                 .build()
+                ));
+        when(pricingPlanMapper.selectList(org.mockito.ArgumentMatchers.isNull()))
+                .thenReturn(List.of(
+                        PricingPlan.builder().hirePeriod("HOUR_1").build(),
+                        PricingPlan.builder().hirePeriod("HOUR_4").build(),
+                        PricingPlan.builder().hirePeriod("DAY_1").build(),
+                        PricingPlan.builder().hirePeriod("DAY_3").build()
                 ));
 
         AdminWeeklyRevenueSummary summary = adminRevenueService.getWeeklyRevenueSummary();
@@ -74,7 +87,8 @@ class AdminRevenueServiceImplTest {
         assertEquals("DAY_1", summary.getBuckets().get(2).getHirePeriod());
         assertEquals(1L, summary.getBuckets().get(2).getOrderCount());
         assertEquals(new BigDecimal("30.00"), summary.getBuckets().get(2).getTotalRevenue());
-        assertEquals("WEEK_1", summary.getBuckets().get(3).getHirePeriod());
+        assertEquals("DAY_3", summary.getBuckets().get(3).getHirePeriod());
+        assertEquals(0L, summary.getBuckets().get(3).getOrderCount());
     }
 
     @Test
@@ -92,6 +106,11 @@ class AdminRevenueServiceImplTest {
                                 .totalRevenue(new BigDecimal("15.00"))
                                 .build()
                 ));
+        when(pricingPlanMapper.selectList(org.mockito.ArgumentMatchers.isNull()))
+                .thenReturn(List.of(
+                        PricingPlan.builder().hirePeriod("HOUR_1").build(),
+                        PricingPlan.builder().hirePeriod("HOUR_4").build()
+                ));
 
         AdminWeeklyRevenueSummary summary = adminRevenueService.getWeeklyRevenueSummary();
 
@@ -102,11 +121,16 @@ class AdminRevenueServiceImplTest {
     void getWeeklyRevenueSummaryReturnsNullMostPopularWhenThereIsNoRevenue() {
         when(paymentMapper.selectWeeklyRevenueBuckets(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
                 .thenReturn(List.of());
+        when(pricingPlanMapper.selectList(org.mockito.ArgumentMatchers.isNull()))
+                .thenReturn(List.of(
+                        PricingPlan.builder().hirePeriod("HOUR_1").build(),
+                        PricingPlan.builder().hirePeriod("HOUR_4").build()
+                ));
 
         AdminWeeklyRevenueSummary summary = adminRevenueService.getWeeklyRevenueSummary();
 
         assertNull(summary.getMostPopularHirePeriod());
-        assertEquals(4, summary.getBuckets().size());
+        assertEquals(2, summary.getBuckets().size());
         assertEquals(0L, summary.getBuckets().get(0).getOrderCount());
         assertEquals(BigDecimal.ZERO, summary.getBuckets().get(0).getTotalRevenue());
     }

@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h2 class="page-heading">Pricing Plan Management</h2>
-        <p class="page-copy">Maintain the four fixed Sprint 2 hire periods and their prices.</p>
+        <p class="page-copy">Create fixed or custom hire periods and maintain their prices.</p>
       </div>
       <div class="header-actions">
         <el-button :loading="loading" @click="loadPlans">
@@ -83,15 +83,32 @@
       @close="resetForm"
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
-        <el-form-item label="Hire Period Code" prop="hirePeriod">
-          <el-select v-model="form.hirePeriod" placeholder="Select a hire period" style="width: 100%">
+        <el-form-item label="Duration Value" prop="durationValue">
+          <el-input-number
+            v-model="form.durationValue"
+            :min="1"
+            :step="1"
+            :step-strictly="true"
+            style="width: 100%"
+          />
+        </el-form-item>
+
+        <el-form-item label="Duration Unit" prop="durationUnit">
+          <el-select v-model="form.durationUnit" placeholder="Select a duration unit" style="width: 100%">
             <el-option
-              v-for="option in PERIOD_OPTIONS"
+              v-for="option in DURATION_UNIT_OPTIONS"
               :key="option.value"
-              :label="`${option.label} (${option.value})`"
+              :label="option.label"
               :value="option.value"
             />
           </el-select>
+        </el-form-item>
+
+        <el-form-item label="Hire Period Code">
+          <el-input :model-value="hirePeriodCode" readonly />
+          <div class="field-help">
+            Generated in `UNIT_NUMBER` format, for example `HOUR_2`, `DAY_3`, `WEEK_2`, or `MONTH_1`.
+          </div>
         </el-form-item>
 
         <el-form-item label="Price" prop="price">
@@ -116,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
@@ -127,10 +144,12 @@ import {
   type PricingPlanDto
 } from '@/api/admin'
 import {
-  PERIOD_OPTIONS,
+  DURATION_UNIT_OPTIONS,
+  buildHirePeriodCode,
   formatCurrency,
   formatDateTime,
   formatPeriod,
+  parseHirePeriod,
   sortPlansByPeriod
 } from '@/utils/admin-display'
 
@@ -142,13 +161,21 @@ const editingId = ref<number | null>(null)
 const formRef = ref<FormInstance>()
 const plans = ref<PricingPlanDto[]>([])
 
-const form = ref({
-  hirePeriod: '',
-  price: 1
-})
+function createDefaultForm() {
+  return {
+    durationUnit: 'HOUR',
+    durationValue: 1,
+    price: 1
+  }
+}
+
+const form = ref(createDefaultForm())
+
+const hirePeriodCode = computed(() => buildHirePeriodCode(form.value.durationUnit, form.value.durationValue))
 
 const rules: FormRules = {
-  hirePeriod: [{ required: true, message: 'Please select a hire period', trigger: 'change' }],
+  durationValue: [{ required: true, message: 'Please enter a duration value', trigger: 'change' }],
+  durationUnit: [{ required: true, message: 'Please select a duration unit', trigger: 'change' }],
   price: [{ required: true, message: 'Please enter a price', trigger: 'change' }]
 }
 
@@ -167,18 +194,18 @@ async function loadPlans() {
 function openAdd() {
   isEdit.value = false
   editingId.value = null
-  form.value = {
-    hirePeriod: '',
-    price: 1
-  }
+  form.value = createDefaultForm()
   dialogVisible.value = true
 }
 
 function openEdit(row: PricingPlanDto) {
+  const parsedPeriod = parseHirePeriod(row.hirePeriod)
+
   isEdit.value = true
   editingId.value = row.id ?? null
   form.value = {
-    hirePeriod: row.hirePeriod,
+    durationUnit: parsedPeriod?.unit || 'HOUR',
+    durationValue: parsedPeriod?.value || 1,
     price: Number(row.price || 0)
   }
   dialogVisible.value = true
@@ -186,10 +213,7 @@ function openEdit(row: PricingPlanDto) {
 
 function resetForm() {
   editingId.value = null
-  form.value = {
-    hirePeriod: '',
-    price: 1
-  }
+  form.value = createDefaultForm()
   formRef.value?.clearValidate()
 }
 
@@ -204,17 +228,22 @@ async function submitForm() {
       return
     }
 
+    if (!hirePeriodCode.value) {
+      ElMessage.warning('Please enter a valid duration.')
+      return
+    }
+
     submitLoading.value = true
     try {
       if (isEdit.value && editingId.value != null) {
         await updatePricingPlan(editingId.value, {
-          hirePeriod: form.value.hirePeriod,
+          hirePeriod: hirePeriodCode.value,
           price: form.value.price
         })
         ElMessage.success('Pricing plan updated successfully.')
       } else {
         await createPricingPlan({
-          hirePeriod: form.value.hirePeriod,
+          hirePeriod: hirePeriodCode.value,
           price: form.value.price
         })
         ElMessage.success('Pricing plan created successfully.')
@@ -346,9 +375,15 @@ onMounted(() => {
 }
 
 .plan-updated,
-.card-note {
+.card-note,
+.field-help {
   font-size: 13px;
   color: #6b7280;
+}
+
+.field-help {
+  margin-top: 8px;
+  line-height: 1.6;
 }
 
 .table-header {

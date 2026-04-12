@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h2 class="page-heading">Dashboard</h2>
-        <p class="page-copy">Sprint 2 admin summary for fleet, pricing, and weekly revenue.</p>
+        <p class="page-copy">Admin summary for fleet, pricing, and weekly revenue.</p>
       </div>
       <el-button :loading="loading" @click="loadDashboardData">
         <el-icon><Refresh /></el-icon>
@@ -127,7 +127,7 @@
           <template #header>
             <div class="card-header">
               <span class="card-title">Weekly Revenue Buckets</span>
-              <span class="card-note">All fixed hire periods are shown, even if they are currently zero.</span>
+              <span class="card-note">All current hire periods are shown, including plans with zero revenue.</span>
             </div>
           </template>
 

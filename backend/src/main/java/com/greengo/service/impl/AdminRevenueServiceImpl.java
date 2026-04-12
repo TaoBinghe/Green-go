@@ -2,8 +2,11 @@ package com.greengo.service.impl;
 
 import com.greengo.domain.AdminWeeklyRevenueBucket;
 import com.greengo.domain.AdminWeeklyRevenueSummary;
+import com.greengo.domain.PricingPlan;
 import com.greengo.mapper.PaymentMapper;
+import com.greengo.mapper.PricingPlanMapper;
 import com.greengo.service.AdminRevenueService;
+import com.greengo.utils.PricingPlanPeriodUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +17,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminRevenueServiceImpl implements AdminRevenueService {
 
-    private static final List<String> HIRE_PERIOD_ORDER = List.of("HOUR_1", "HOUR_4", "DAY_1", "WEEK_1");
-
     @Autowired
     private PaymentMapper paymentMapper;
+
+    @Autowired
+    private PricingPlanMapper pricingPlanMapper;
 
     private Clock clock = Clock.systemDefaultZone();
 
@@ -36,8 +41,20 @@ public class AdminRevenueServiceImpl implements AdminRevenueService {
             aggregatedBuckets.forEach(bucket -> bucketMap.put(bucket.getHirePeriod(), normalizeBucket(bucket)));
         }
 
+        List<PricingPlan> pricingPlans = pricingPlanMapper.selectList(null);
+        List<String> allHirePeriods = (pricingPlans == null ? List.<PricingPlan>of() : pricingPlans).stream()
+                .map(PricingPlan::getHirePeriod)
+                .distinct()
+                .collect(Collectors.toCollection(ArrayList::new));
+        for (String hirePeriod : bucketMap.keySet()) {
+            if (!allHirePeriods.contains(hirePeriod)) {
+                allHirePeriods.add(hirePeriod);
+            }
+        }
+        allHirePeriods.sort(PricingPlanPeriodUtil::compareHirePeriods);
+
         List<AdminWeeklyRevenueBucket> buckets = new ArrayList<>();
-        for (String hirePeriod : HIRE_PERIOD_ORDER) {
+        for (String hirePeriod : allHirePeriods) {
             buckets.add(bucketMap.getOrDefault(hirePeriod, zeroBucket(hirePeriod)));
         }
 

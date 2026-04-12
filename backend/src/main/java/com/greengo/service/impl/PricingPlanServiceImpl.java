@@ -6,6 +6,7 @@ import com.greengo.domain.PricingPlan;
 import com.greengo.mapper.BookingMapper;
 import com.greengo.mapper.PricingPlanMapper;
 import com.greengo.service.PricingPlanService;
+import com.greengo.utils.PricingPlanPeriodUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,14 +34,21 @@ public class PricingPlanServiceImpl implements PricingPlanService {
 
     @Override
     public boolean create(PricingPlan plan) {
-        if (plan == null || plan.getHirePeriod() == null || plan.getHirePeriod().isBlank()) {
+        if (plan == null) {
+            return false;
+        }
+
+        String normalizedHirePeriod = PricingPlanPeriodUtil.normalizeHirePeriod(plan.getHirePeriod());
+        if (normalizedHirePeriod == null) {
             return false;
         }
         if (plan.getPrice() == null || plan.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             return false;
         }
+
+        plan.setHirePeriod(normalizedHirePeriod);
         LambdaQueryWrapper<PricingPlan> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(PricingPlan::getHirePeriod, plan.getHirePeriod());
+        wrapper.eq(PricingPlan::getHirePeriod, normalizedHirePeriod);
         Long count = pricingPlanMapper.selectCount(wrapper);
         if (count != null && count > 0) {
             return false;
@@ -61,13 +69,17 @@ public class PricingPlanServiceImpl implements PricingPlanService {
             return false;
         }
         if (plan.getHirePeriod() != null && !plan.getHirePeriod().equals(existing.getHirePeriod())) {
+            String normalizedHirePeriod = PricingPlanPeriodUtil.normalizeHirePeriod(plan.getHirePeriod());
+            if (normalizedHirePeriod == null) {
+                return false;
+            }
             LambdaQueryWrapper<PricingPlan> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(PricingPlan::getHirePeriod, plan.getHirePeriod()).ne(PricingPlan::getId, id);
+            wrapper.eq(PricingPlan::getHirePeriod, normalizedHirePeriod).ne(PricingPlan::getId, id);
             Long count = pricingPlanMapper.selectCount(wrapper);
             if (count != null && count > 0) {
                 return false;
             }
-            existing.setHirePeriod(plan.getHirePeriod());
+            existing.setHirePeriod(normalizedHirePeriod);
         }
         if (plan.getPrice() != null) {
             existing.setPrice(plan.getPrice());

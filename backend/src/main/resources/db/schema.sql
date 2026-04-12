@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `scooter` (
 -- Pricing plan table
 CREATE TABLE IF NOT EXISTS `pricing_plan` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `hire_period` VARCHAR(32) NOT NULL COMMENT 'Hire period: HOUR_1/HOUR_4/DAY_1/WEEK_1',
+    `hire_period` VARCHAR(32) NOT NULL COMMENT 'Hire period code in UNIT_NUMBER format, e.g. HOUR_1 or DAY_3',
     `price` DECIMAL(10, 2) NOT NULL COMMENT 'Price',
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS `payment` (
     CONSTRAINT `fk_payment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Payment table';
 
--- Initial pricing plan data (1hr, 4hrs, 1day, 1week)
+-- Initial pricing plan data
 INSERT INTO `pricing_plan` (`hire_period`, `price`) VALUES
     ('HOUR_1', 5.00),
     ('HOUR_4', 15.00),

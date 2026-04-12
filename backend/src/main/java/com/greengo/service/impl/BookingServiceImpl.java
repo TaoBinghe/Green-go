@@ -13,6 +13,7 @@ import com.greengo.mapper.PricingPlanMapper;
 import com.greengo.mapper.ScooterMapper;
 import com.greengo.service.BookingService;
 import com.greengo.service.PaymentService;
+import com.greengo.utils.PricingPlanPeriodUtil;
 import com.greengo.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -228,8 +229,13 @@ public class BookingServiceImpl extends ServiceImpl<BookingMapper, Booking> impl
     }
 
     private PricingPlan findPricingPlanByHirePeriod(String hiredPeriod) {
+        String normalizedHirePeriod = PricingPlanPeriodUtil.normalizeHirePeriod(hiredPeriod);
+        if (normalizedHirePeriod == null) {
+            throw new IllegalArgumentException("Pricing plan not found");
+        }
+
         PricingPlan pricingPlan = pricingPlanMapper.selectOne(
-                new QueryWrapper<PricingPlan>().eq("hire_period", hiredPeriod)
+                new QueryWrapper<PricingPlan>().eq("hire_period", normalizedHirePeriod)
         );
         if (pricingPlan == null) {
             throw new IllegalArgumentException("Pricing plan not found");
@@ -257,22 +263,7 @@ public class BookingServiceImpl extends ServiceImpl<BookingMapper, Booking> impl
     }
 
     private LocalDateTime calculateEndTime(LocalDateTime baseTime, PricingPlan pricingPlan) {
-        if (baseTime == null) {
-            throw new IllegalArgumentException("Booking time is missing");
-        }
-
-        switch (pricingPlan.getHirePeriod()) {
-            case "HOUR_1":
-                return baseTime.plusHours(1);
-            case "HOUR_4":
-                return baseTime.plusHours(4);
-            case "DAY_1":
-                return baseTime.plusDays(1);
-            case "WEEK_1":
-                return baseTime.plusWeeks(1);
-            default:
-                throw new IllegalArgumentException("Pricing plan not found");
-        }
+        return PricingPlanPeriodUtil.addPeriod(baseTime, pricingPlan.getHirePeriod());
     }
 
     private void ensureNoOpenBooking(Long userId, Long excludeBookingId, String message) {

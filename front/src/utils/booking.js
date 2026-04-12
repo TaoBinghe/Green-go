@@ -1,17 +1,29 @@
-export const PERIOD_SEQUENCE = ['HOUR_1', 'HOUR_4', 'DAY_1', 'WEEK_1']
+const DURATION_UNIT_ORDER = ['MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH']
+const HIRE_PERIOD_PATTERN = /^(MINUTE|HOUR|DAY|WEEK|MONTH)_(\d+)$/i
 
-const PERIOD_LABELS = {
-  HOUR_1: '1 Hour',
-  HOUR_4: '4 Hours',
-  DAY_1: '1 Day',
-  WEEK_1: '1 Week'
+const DURATION_UNIT_CONFIG = {
+  MINUTE: { singular: 'Minute', plural: 'Minutes', short: 'M', sortMinutes: 1 },
+  HOUR: { singular: 'Hour', plural: 'Hours', short: 'H', sortMinutes: 60 },
+  DAY: { singular: 'Day', plural: 'Days', short: 'D', sortMinutes: 1440 },
+  WEEK: { singular: 'Week', plural: 'Weeks', short: 'W', sortMinutes: 10080 },
+  MONTH: { singular: 'Month', plural: 'Months', short: 'MO', sortMinutes: 43200 }
 }
 
-const PERIOD_BADGES = {
-  HOUR_1: '1H',
-  HOUR_4: '4H',
-  DAY_1: '1D',
-  WEEK_1: '7D'
+export function parseHirePeriod(period) {
+  const normalized = String(period || '').trim().toUpperCase()
+  const match = normalized.match(HIRE_PERIOD_PATTERN)
+  if (!match) return null
+
+  const value = Number(match[2])
+  if (!Number.isInteger(value) || value <= 0) return null
+
+  const unit = match[1]
+  return {
+    unit,
+    value,
+    code: `${unit}_${value}`,
+    sortWeight: value * DURATION_UNIT_CONFIG[unit].sortMinutes
+  }
 }
 
 export function normalizeBookingStatus(status) {
@@ -20,11 +32,18 @@ export function normalizeBookingStatus(status) {
 }
 
 export function formatPeriod(period) {
-  return PERIOD_LABELS[period] || period || '-'
+  const parsed = parseHirePeriod(period)
+  if (!parsed) return period || '-'
+
+  const config = DURATION_UNIT_CONFIG[parsed.unit]
+  return `${parsed.value} ${parsed.value === 1 ? config.singular : config.plural}`
 }
 
 export function formatPeriodBadge(period) {
-  return PERIOD_BADGES[period] || period || '-'
+  const parsed = parseHirePeriod(period)
+  if (!parsed) return period || '-'
+
+  return `${parsed.value}${DURATION_UNIT_CONFIG[parsed.unit].short}`
 }
 
 export function formatCurrency(value) {
@@ -43,15 +62,27 @@ export function isOpenBooking(status) {
 }
 
 export function sortPricingPlans(plans = []) {
-  const rank = PERIOD_SEQUENCE.reduce((map, period, index) => {
-    map[period] = index
-    return map
-  }, {})
-
   return [...plans].sort((left, right) => {
-    const leftRank = rank[left.hirePeriod] ?? Number.MAX_SAFE_INTEGER
-    const rightRank = rank[right.hirePeriod] ?? Number.MAX_SAFE_INTEGER
-    return leftRank - rightRank
+    const leftParsed = parseHirePeriod(left.hirePeriod)
+    const rightParsed = parseHirePeriod(right.hirePeriod)
+
+    if (leftParsed && rightParsed) {
+      if (leftParsed.sortWeight !== rightParsed.sortWeight) {
+        return leftParsed.sortWeight - rightParsed.sortWeight
+      }
+
+      const leftUnitOrder = DURATION_UNIT_ORDER.indexOf(leftParsed.unit)
+      const rightUnitOrder = DURATION_UNIT_ORDER.indexOf(rightParsed.unit)
+      if (leftUnitOrder !== rightUnitOrder) {
+        return leftUnitOrder - rightUnitOrder
+      }
+
+      return leftParsed.value - rightParsed.value
+    }
+
+    if (leftParsed) return -1
+    if (rightParsed) return 1
+    return String(left.hirePeriod || '').localeCompare(String(right.hirePeriod || ''))
   })
 }
 
